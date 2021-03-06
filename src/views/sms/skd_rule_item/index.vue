@@ -174,30 +174,20 @@
     <!-- 添加或修改排班规则对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="状态">
-          <el-radio-group v-model="form.status">
-            <el-radio label="1">请选择字典生成</el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="操作人id" prop="operatorId">
-          <el-input v-model="form.operatorId" placeholder="请输入操作人id"/>
-        </el-form-item>
-        <el-form-item label="创建时间" prop="operateTime">
-          <el-date-picker clearable size="small"
-                          v-model="form.operateTime"
-                          type="date"
-                          value-format="yyyy-MM-dd"
-                          placeholder="选择创建时间">
+        <el-form-item label="开始时间" prop="operatorId">
+          <el-date-picker
+            v-model="value1"
+            type="date"
+            placeholder="选择日期">
           </el-date-picker>
         </el-form-item>
-        <el-form-item label="规则名" prop="ruleName">
-          <el-input v-model="form.ruleName" placeholder="请输入规则名"/>
-        </el-form-item>
-        <el-form-item label="描述" prop="description">
-          <el-input v-model="form.description" placeholder="请输入描述"/>
-        </el-form-item>
-        <el-form-item label="科室id" prop="deptId">
-          <el-input v-model="form.deptId" placeholder="请输入科室id"/>
+
+        <el-form-item label="结束时间" prop="operatorId">
+          <el-date-picker
+            v-model="value1"
+            type="date"
+            placeholder="选择日期">
+          </el-date-picker>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">

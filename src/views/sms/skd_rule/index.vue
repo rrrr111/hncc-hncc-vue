@@ -62,7 +62,7 @@
             size="mini"
             type="text"
             icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
+            @click="generatePlanMethod(scope.row)"
             v-hasPermi="['sms:rule:remove']"
           >生成排班时间
           </el-button>
@@ -81,30 +81,22 @@
     <!-- 添加或修改排班规则对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="状态">
-          <el-radio-group v-model="form.status">
-            <el-radio label="1">请选择字典生成</el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="操作人id" prop="operatorId">
-          <el-input v-model="form.operatorId" placeholder="请输入操作人id"/>
-        </el-form-item>
-        <el-form-item label="创建时间" prop="operateTime">
-          <el-date-picker clearable size="small"
-                          v-model="form.operateTime"
-                          type="date"
-                          value-format="yyyy-MM-dd"
-                          placeholder="选择创建时间">
+        <el-form-item label="开始时间" prop="operatorId">
+          <el-date-picker
+            v-model="form.startTime"
+            type="date"
+            value-format="yyyy-MM-dd"
+            placeholder="选择日期">
           </el-date-picker>
         </el-form-item>
-        <el-form-item label="规则名" prop="ruleName">
-          <el-input v-model="form.ruleName" placeholder="请输入规则名"/>
-        </el-form-item>
-        <el-form-item label="描述" prop="description">
-          <el-input v-model="form.description" placeholder="请输入描述"/>
-        </el-form-item>
-        <el-form-item label="科室id" prop="deptId">
-          <el-input v-model="form.deptId" placeholder="请输入科室id"/>
+
+        <el-form-item label="结束时间" prop="operatorId">
+          <el-date-picker
+            v-model="form.endTime"
+            type="date"
+            value-format="yyyy-MM-dd"
+            placeholder="选择日期">
+          </el-date-picker>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -116,13 +108,10 @@
 </template>
 
 <script>
-  // import the component
+  import {listRule, delRule, addRule, updateRule, exportRule, generatePlan} from "../../../api/sms/skd_rule/skd_rule";
+  import {listDeptTree} from "../../../api/system/dept";
   import treeselect from '@riophae/vue-treeselect'
-  // import the styles
   import '@riophae/vue-treeselect/dist/vue-treeselect.css'
-  import {listRule, getRule, delRule, addRule, updateRule, exportRule} from "../../../api/sms/skd_rule/skd_rule";
-  import {listDept, listDeptTree} from "../../../api/system/dept";
-
   export default {
     components: {treeselect},
     name: "index",
@@ -169,6 +158,13 @@
       this.getList();
     },
     methods: {
+      //生成排班计划
+      generatePlanMethod(row) {
+        this.open = true;
+        this.form.skdRuleId = row.id;
+
+
+      },
       //点击新增跳转
       handleAdd() {
         this.$destroy(true);
@@ -177,8 +173,6 @@
       //部门选择
       treeselectChange(node, instanceId) {
         this.queryParams.deptId = node.id;
-        console.log("node--------", node)
-        console.log("instanceId--------", instanceId)
         this.getList();
       },
       /** 查询排班规则列表 */
@@ -231,9 +225,11 @@
 
       /** 修改按钮操作 */
       handleUpdate(row) {
-        this.$router.push({path: "/skd/skd_rule_item",query: {
+        this.$router.push({
+          path: "/skd/skd_rule_item", query: {
             id: row.id
-          }});
+          }
+        });
         // this.reset();
         // const id = row.id || this.ids
         // getRule(id).then(response => {
@@ -244,23 +240,25 @@
       },
       /** 提交按钮 */
       submitForm() {
-        this.$refs["form"].validate(valid => {
-          if (valid) {
-            if (this.form.id != null) {
-              updateRule(this.form).then(response => {
-                this.msgSuccess("修改成功");
-                this.open = false;
-                this.getList();
-              });
-            } else {
-              addRule(this.form).then(response => {
-                this.msgSuccess("新增成功");
-                this.open = false;
-                this.getList();
-              });
-            }
+        if (new Date(this.form.startTime) > new Date(this.form.endTime)) {
+          this.msgError("结束时间不能早于开始时间");
+          return false;
+        }
+
+        console.log(this.form)
+        generatePlan(this.form).then(respon => {
+
+          this.msgSuccess("生成成功");
+          this.form={
+            skdRuleId:undefined,
+            startTime:undefined,
+            endTime:undefined
           }
-        });
+          this.open = false;
+          this.getList();
+
+        })
+
       },
       /** 删除按钮操作 */
       handleDelete(row) {

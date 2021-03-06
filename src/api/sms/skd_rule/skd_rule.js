@@ -1,5 +1,14 @@
 import request from '@/utils/request'
 
+
+export function generatePlan(data) {
+  return request({
+    url: '/sms/skdrule/createPlan',
+    method: 'post',
+    data: data
+  })
+}
+
 // 查询排班规则列表
 export function listRule(query) {
   return request({
